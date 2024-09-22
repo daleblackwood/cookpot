@@ -1,0 +1,10 @@
+[gd_scene load_steps=5 format=3 uid="uid://ds6oy75hy60vf"]
+
+[ext_resource type="AudioStream" uid="uid://kal7uo0jrl2" path="res://sounds/jump1.wav" id="1_6a24i"]
+[ext_resource type="Script" path="res://addons/cookpot/CookSFX.gd" id="1_tiku6"]
+[ext_resource type="AudioStream" uid="uid://bmita0qtr8oyk" path="res://sounds/jump2.wav" id="2_11cfm"]
+[ext_resource type="AudioStream" uid="uid://slwd7p8jd2ko" path="res://sounds/jump3.wav" id="3_ti2hc"]
+
+[node name="CookSFX" type="Node3D"]
+script = ExtResource("1_tiku6")
+audio_files = Array[AudioStream]([ExtResource("1_6a24i"), ExtResource("2_11cfm"), ExtResource("3_ti2hc")])
