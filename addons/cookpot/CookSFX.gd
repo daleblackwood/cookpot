@@ -7,7 +7,7 @@ class AudioGroup:
 	func _init(name: String) -> void:
 		self.name = name
 
-@export var audio_files: Array[AudioStream] = []
+@export var sfx_list: CookSFXList
 
 const channel_count := 16
 
@@ -40,10 +40,12 @@ func get_next_channel() -> AudioStreamPlayer3D:
 		
 		
 func get_file(sound_name: String, index := -1) -> AudioStream:
+	if sfx_list == null or sfx_list.audio_files.size() < 1:
+		return null
 	var tag := name_to_group_tag(sound_name)
 	if groups.has(tag) == false:
 		var new_group = AudioGroup.new(tag)
-		for file in audio_files:
+		for file in sfx_list.audio_files:
 			var ft := name_to_group_tag(file.resource_path)
 			if ft == tag:
 				new_group.files.append(file)
@@ -67,7 +69,7 @@ static func name_to_group_tag(s: String) -> String:
 	var start := s.rfindn("/") + 1
 	var end := s.length()
 	var last_dot = s.rfindn(".")
-	if last_dot > 0:
+	if last_dot > 0 and last_dot > start:
 		end = last_dot
 	for i in range(start, end):
 		var c = s[i].to_lower()
