@@ -9,7 +9,7 @@ func set_count(key: String, value: int, player := 0) -> void:
 	data[k] = value
 	
 	
-func increase_count(key: String, inc: int, player := 0) -> void:
+func increase_count(key: String, inc := 1, player := 0) -> void:
 	var v = get_count(key, player)
 	set_count(key, v + inc)
 	
