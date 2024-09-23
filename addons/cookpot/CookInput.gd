@@ -19,9 +19,9 @@ var connected_joys: Array[int] = []
 func _process(_delta: float):
 	var mouse_move = mouse_delta * 0.1
 	
-	if sets.size() != max_player_count:
-		sets.resize(max_player_count)
-		for i in range(max_player_count):
+	if sets.size() != player_count:
+		sets.resize(player_count)
+		for i in range(player_count):
 			sets[i] = InputSet.new()
 			
 	connected_joys = Input.get_connected_joypads()
@@ -44,18 +44,18 @@ func _process(_delta: float):
 			
 			if Input.is_key_pressed(KEY_SPACE):
 				step.primary = true
-			if Input.is_key_pressed(KEY_SHIFT):
+			if Input.is_key_pressed(KEY_ALT):
 				step.secondary = true
 			if Input.is_key_pressed(KEY_CTRL):
 				step.trigger = true
-		elif i == 1 or (i == 0 and player_count < 2):
+		if i == 1 or (i == 0 and player_count < 2):
 			step.move.x += _key_axis(KEY_A, KEY_D)
 			step.move.y += _key_axis(KEY_W, KEY_S)
 			step.view.x += _key_axis(KEY_Q, KEY_E)
 			
 			if Input.is_key_pressed(KEY_R):
 				step.primary = true
-			if Input.is_key_pressed(KEY_F):
+			if Input.is_key_pressed(KEY_R):
 				step.secondary = true
 			if Input.is_key_pressed(KEY_SHIFT):
 				step.trigger = true
@@ -74,10 +74,10 @@ func _process(_delta: float):
 				step.trigger = true
 	
 			
-func get_inputs(player: int) -> InputSet:
-	if player < 0 or player >= sets.size():
+func get_input(index: int) -> InputSet:
+	if index < 0 or index >= sets.size():
 		return null
-	return sets[player]
+	return sets[index]
 	
 
 func _input(event):

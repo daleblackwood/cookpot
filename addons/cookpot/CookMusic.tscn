@@ -3,6 +3,6 @@
 [ext_resource type="Script" path="res://addons/cookpot/CookMusic.gd" id="1_no3ji"]
 [ext_resource type="Resource" uid="uid://dabofueyj27dv" path="res://audio/music/MusicList.tres" id="2_nocll"]
 
-[node name="CookMusic" type="Node2D"]
+[node name="CookMusic" type="Node"]
 script = ExtResource("1_no3ji")
 music_list = ExtResource("2_nocll")
