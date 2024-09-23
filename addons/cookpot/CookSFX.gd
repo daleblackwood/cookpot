@@ -42,11 +42,11 @@ func get_next_channel() -> AudioStreamPlayer3D:
 func get_file(sound_name: String, index := -1) -> AudioStream:
 	if sfx_list == null or sfx_list.audio_files.size() < 1:
 		return null
-	var tag := name_to_group_tag(sound_name)
+	var tag := CookStrings.to_tag(sound_name, false)
 	if groups.has(tag) == false:
 		var new_group = AudioGroup.new(tag)
 		for file in sfx_list.audio_files:
-			var ft := name_to_group_tag(file.resource_path)
+			var ft := CookStrings.to_tag(file.resource_path, false)
 			if ft == tag:
 				new_group.files.append(file)
 		if new_group.files.size() < 1:
@@ -62,18 +62,3 @@ func get_file(sound_name: String, index := -1) -> AudioStream:
 	var file := group.files[index]
 	group.index = (index + 1) % group.files.size()
 	return file
-	
-		
-static func name_to_group_tag(s: String) -> String:
-	var r = ""
-	var start := s.rfindn("/") + 1
-	var end := s.length()
-	var last_dot = s.rfindn(".")
-	if last_dot > 0 and last_dot > start:
-		end = last_dot
-	for i in range(start, end):
-		var c = s[i].to_lower()
-		if c < 'a' or c > 'z':
-			continue
-		r += c
-	return r

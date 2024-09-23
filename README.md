@@ -1,7 +1,9 @@
 ## Cookpot Plugin by Completely Cooked Games
 
-Cookpot is a plugin for Godot that provides essential tools for game prototyping, including input handling, 3D math utilities, and sound effect management.
-Features
+Cookpot is a plugin for Godot that provides essential tools for game prototyping, including input handling, sound effect management, graphic fx pooling / spawning and music management
+
+
+## Features
 
 
 ### CookInput:
@@ -34,9 +36,23 @@ A one-shot sound effect player with sound effect grouping functionality, allowin
 
 **For example:** to play a jump sound:
 
-1. Add one or more sounds prefixed with "jump" to a CookSFXList resource.
+1. Create a CookSFXList resource.
+2. Add a sound called something like `res://sounds/jump.wav` to the CookSFXList resource.
 2. Add the CookSFXList resource to the CookSFX scene (or assign via code)
-3. Call `CookSFX.play("jump", global_transform.origin)`
+3. Call `CookSFX.play("jump", global_transform.origin)` to play it
+
+
+### CookMusic:
+
+A looping background music player with master volume and loop control
+
+**For example:** to play a music:
+
+1. Create a CookMusicList resource.
+2. Add a music file called something like `res://music/music.mp3`
+2. Add the CookMusicList resource to the CookMusic scene (or assign via code)
+3. Call `CookMusic.play("music")`
+
 
 
 ### CookGFX:
@@ -45,10 +61,11 @@ A one-shot scene effect instnacer with pooling functionality, allowing for easy 
 
 **For example:**, to play a smoke particle effect:
 
-1. Add a scene with a smoke particle called "smoke" to a CookGFXList resource.
+1. Create a CookGFXList resource.
+1. Add a scene with a smoke particle called something like `res://gfx/smoke.tsn` to the CookGFXList resource.
 2. Add the CookGFXList resource to the CookGFX scene (or assign via code)
-3. Call `CookGFX.fire("smoke", global_transform.origin)`
+3. Call `CookGFX.fire(self, "smoke", global_transform.origin)`
 
 ## How to Use
 
-Add the plugin to your Godot project. Get it done.
+Add the plugin to your Godot project and you're ready to go.
