@@ -2,6 +2,7 @@ extends Node3D
 
 @export var gfx_list: CookGFXList
 
+
 func fire(name: String, position: Vector3, data: Variant = null) -> Node3D:
 	if gfx_list == null:
 		printerr("No GFX List set")
@@ -16,6 +17,7 @@ func fire(name: String, position: Vector3, data: Variant = null) -> Node3D:
 		else:
 			inst.call("_on_fire", data)
 	return inst
+	
 
 func fire_many(count: int, name: String, position: Vector3, data: Variant = null) -> Array[Node3D]:
 	var result: Array[Node3D] = []
