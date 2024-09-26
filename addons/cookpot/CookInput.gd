@@ -10,14 +10,23 @@ class InputSet:
 	var primary := false
 	var secondary := false
 	var trigger := false
+	func reset() -> void:
+		move = Vector2.ZERO
+		view = Vector2.ZERO
+		primary = false
+		secondary = false
+		trigger = false
 	
 var mouse_delta = Vector2.ZERO
 var sets: Array[InputSet] = []
 var connected_joys: Array[int] = []
 
+var blank_input = InputSet.new()
 
 func _process(_delta: float):
 	var mouse_move = mouse_delta * 0.1
+	
+	blank_input.reset()
 	
 	if sets.size() != player_count:
 		sets.resize(player_count)
@@ -28,11 +37,7 @@ func _process(_delta: float):
 	
 	for i in range(player_count):
 		var step := sets[i]
-		step.move = Vector2.ZERO
-		step.view = Vector2.ZERO
-		step.primary = false
-		step.secondary = false
-		step.trigger = false
+		step.reset()
 		
 		if i == 0:
 			step.move.x += _key_axis(KEY_LEFT, KEY_RIGHT)
@@ -76,7 +81,7 @@ func _process(_delta: float):
 			
 func get_input(index: int) -> InputSet:
 	if index < 0 or index >= sets.size():
-		return null
+		return blank_input
 	return sets[index]
 	
 

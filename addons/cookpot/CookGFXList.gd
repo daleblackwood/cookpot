@@ -35,6 +35,8 @@ func get_pool(name: String) -> PoolEntry:
 		var scene_index := -1
 		for i in range(scenes.size()):
 			var scene = scenes[i]
+			if scene == null:
+				continue
 			var scene_tag = CookStrings.to_tag(scene.resource_path)
 			if scene_tag == tag:
 				scene_index = i

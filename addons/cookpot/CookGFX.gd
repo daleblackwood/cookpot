@@ -8,6 +8,8 @@ func fire(name: String, position: Vector3, data: Variant = null) -> Node3D:
 		printerr("No GFX List set")
 		return null
 	var inst = gfx_list.get_instance(name)
+	if inst == null:
+		return null
 	if inst.get_parent() == null:
 		add_child(inst)
 	inst.global_transform.origin = position
@@ -30,8 +32,11 @@ func fire_body(name: String, position: Vector3, spread: float, height := INF, da
 	if is_inf(height):
 		height = spread
 	var body := fire(name, position, data) as RigidBody3D
-	var impulse = Vector3(randf_range(-spread, spread), height, randf_range(-spread, spread))
-	body.apply_impulse(impulse)
+	if body != null:
+		var impulse = Vector3(randf_range(-spread, spread), height, randf_range(-spread, spread))
+		body.global_transform.origin += impulse * 0.1
+		body.global_transform.basis = Basis().rotated(Vector3.UP, randf_range(-PI, PI)).rotated(Vector3.FORWARD, randf_range(-PI, PI))	
+		body.apply_impulse(impulse)
 	return body
 	
 	
