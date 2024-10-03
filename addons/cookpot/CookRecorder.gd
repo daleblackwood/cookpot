@@ -1,6 +1,6 @@
 class_name CookRecorder
 
-const INTERVAL := 0.25
+const INTERVAL := 0.2
 
 class Snapshot:
 	var time := 0.0
