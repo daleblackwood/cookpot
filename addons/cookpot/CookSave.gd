@@ -11,7 +11,7 @@ func set_count(key: String, value: int, player := 0) -> void:
 	
 func increase_count(key: String, inc := 1, player := 0) -> void:
 	var v = get_count(key, player)
-	set_count(key, v + inc)
+	set_count(key, v + inc, player)
 	
 	
 func get_count(key: String, player := 0) -> int:
