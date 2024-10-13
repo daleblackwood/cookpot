@@ -4,8 +4,9 @@ extends Node
 
 var player: AudioStreamPlayer
 var playing: CookMusicEntry
+var position := 0.0
 
-func play(name: String, restart := false) -> void:
+func play(name: String, restart := false, time := 0.0) -> void:
 	if music_list == null:
 		printerr("CookMusicList must be added to CookMusic")
 	var entry := music_list.get_entry(name)
@@ -17,16 +18,19 @@ func play(name: String, restart := false) -> void:
 	if playing != null and entry == playing:
 		return
 	playing = entry
-	player.volume_db = linear_to_db(music_list.master_volume * playing.volume)
-	player.stream = entry.file
-	player.play()
+	if playing != null:
+		player.volume_db = linear_to_db(music_list.master_volume * playing.volume)
+		player.stream = entry.file
+		player.play(time)
+	else:
+		player.stop()
 
 
 func _process(delta: float) -> void:
 	if playing == null:
 		return
 	if player.playing:
-		var position = player.get_playback_position()
+		position = player.get_playback_position()
 		var remaining = playing.loop_end - position
 		player.volume_db = linear_to_db(music_list.master_volume * playing.volume)			
 		if remaining < 0:

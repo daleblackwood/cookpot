@@ -1,5 +1,7 @@
 extends Node3D
 
+const NO_SOURCE := Vector3.ZERO#Vector3(1234567890, 1234567890, 1234567890)
+
 class AudioGroup:
 	var name : String
 	var index := 0
@@ -24,9 +26,13 @@ func _init() -> void:
 		channels.append(channel)
 
 
-func play(sound_name: String, position: Vector3, volume := 1.0, index := -1) -> void:
+func play(sound_name: String, position: Vector3 = NO_SOURCE, volume := 1.0, index := -1) -> void:
 	var file := get_file(sound_name, index)
 	var channel := get_next_channel()
+	if is_nan(position.x + position.y + position.z):
+		var cam = get_tree().root.get_camera_3d()
+		if cam != null:
+			position =  cam.global_transform.origin
 	channel.global_transform.origin = position
 	channel.stream = file
 	channel.volume_db = volume

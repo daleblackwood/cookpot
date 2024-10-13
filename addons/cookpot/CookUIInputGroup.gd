@@ -2,12 +2,16 @@ extends Control
 
 var buttons: Array[Button]
 var focused: Button
-var input := Vector2.ZERO
-var accepted := false
-
+var initial_focus_delay := 1.0
+var focus_delay := 0.0
 
 func _ready() -> void:
 	buttons = find_buttons(self)
+	focus_delay = initial_focus_delay	
+	
+	
+func grab_focus() -> void:
+	focused = null
 	set_focused(buttons[0])
 	
 	
@@ -25,8 +29,11 @@ func find_buttons(parent: Node) -> Array[Button]:
 	
 	
 func set_focused(button: Button) -> void:
+	if self.focused == button:
+		return
 	self.focused = button
 	button.grab_focus()
+	CookSFX.play("ui-select")
 	
 	
 func move_focus(from: Button, move: Vector2) -> void:
@@ -36,31 +43,44 @@ func move_focus(from: Button, move: Vector2) -> void:
 	var closest: Button = null
 	var closest_sq = INF
 	for button in buttons:
+		if button == from:
+			continue
 		var diff = button.global_position - from.global_position
 		var dir = diff.normalized()
 		var dot = dir.dot(move_dir)
-		if dot < 0.5:
+		if dot < 0.25:
 			continue
-		var dist_sq = diff.length_squared()
+		var dist_sq = diff.length_squared() * dot
 		if dist_sq > closest_sq:
 			continue
 		closest = button
 		closest_sq = dist_sq
 	if closest != null:
 		set_focused(closest)
+		CookSFX.play("ui-select")
 
 
 func _process(delta: float) -> void:
-	var was_input := input
-	var was_accepted := accepted
-	input = Vector2.ZERO
-	accepted = false
+	if visible == false:
+		return
+		
+	if focus_delay > 0.0:
+		focus_delay -= delta
+		if focus_delay < 0.0:
+			set_focused(buttons[0])
+		else:
+			return
+			
+	var move := Vector2.ZERO
+	var accepted = false
 	for i in CookInput.player_count:
 		var player = CookInput.get_input(i)
-		input += player.move
-		if player.primary:
+		if player.primary_fired:
 			accepted = true
-	if accepted and not was_accepted:
+		if player.move_fired:
+			move += player.move
+			break
+	if accepted:
 		focused.pressed.emit()
-	if input != Vector2.ZERO and was_input == Vector2.ZERO:
-		move_focus(focused, input)
+	if move.length_squared() > 0.2:
+		move_focus(focused, move)

@@ -49,7 +49,7 @@ func retrieve(time: float) -> Snapshot:
 	var elapsed = time - before.time
 	var pc = elapsed / gap
 	var snapshot := Snapshot.new()
-	snapshot.time = time
+	snapshot.time = minf(time, after.time)
 	snapshot.position = before.position.lerp(after.position, pc)
 	snapshot.score = floor(lerpf(before.score, after.score, pc))
 	return snapshot

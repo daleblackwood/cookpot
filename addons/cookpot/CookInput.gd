@@ -1,6 +1,7 @@
 extends Node
 
 const max_player_count = 4
+const move_trigger_sq = 0.2
 
 @export_range(1, max_player_count) var player_count := 1
 
@@ -8,14 +9,27 @@ class InputSet:
 	var move := Vector2.ZERO
 	var view := Vector2.ZERO
 	var primary := false
+	var primary_fired := false
 	var secondary := false
+	var secondary_fired := false
 	var trigger := false
+	var move_fired := false
+	var start := false
+	var start_fired := false
+	var back := false
+	var back_fired := false
+	
 	func reset() -> void:
 		move = Vector2.ZERO
 		view = Vector2.ZERO
 		primary = false
+		primary_fired = false
 		secondary = false
+		secondary_fired = false
 		trigger = false
+		move_fired = false
+		start = false
+		start_fired = false
 	
 var mouse_delta = Vector2.ZERO
 var sets: Array[InputSet] = []
@@ -37,6 +51,14 @@ func _process(_delta: float):
 	
 	for i in range(player_count):
 		var step := sets[i]
+		
+		var prev_move = step.move
+		var was_moving = step.move.length_squared() > move_trigger_sq
+		var was_primary = step.primary
+		var was_secondary = step.secondary
+		var was_start = step.start
+		var was_back = step.back
+		
 		step.reset()
 		
 		if i == 0:
@@ -53,6 +75,10 @@ func _process(_delta: float):
 				step.secondary = true
 			if Input.is_key_pressed(KEY_CTRL):
 				step.trigger = true
+			if Input.is_key_pressed(KEY_ENTER):
+				step.start = true
+			if Input.is_key_pressed(KEY_ESCAPE):
+				step.back = true
 		if i == 1 or (i == 0 and player_count < 2):
 			step.move.x += _key_axis(KEY_A, KEY_D)
 			step.move.y += _key_axis(KEY_W, KEY_S)
@@ -66,17 +92,36 @@ func _process(_delta: float):
 				step.trigger = true
 				
 		if i < connected_joys.size():
-			var joy_id := connected_joys[i]
-			step.move.x += Input.get_joy_axis(joy_id, JOY_AXIS_LEFT_X)
-			step.move.y += Input.get_joy_axis(joy_id, JOY_AXIS_LEFT_Y)
-			step.view.x += Input.get_joy_axis(joy_id, JOY_AXIS_RIGHT_X)
-			step.view.y += Input.get_joy_axis(joy_id, JOY_AXIS_RIGHT_Y)
-			if Input.is_joy_button_pressed(joy_id, JOY_BUTTON_A) or Input.is_joy_button_pressed(joy_id, JOY_BUTTON_Y):
+			var jid := connected_joys[i]
+			step.move.x += Input.get_joy_axis(jid, JOY_AXIS_LEFT_X)
+			step.move.x += _bool_axis(Input.is_joy_button_pressed(jid, JOY_BUTTON_DPAD_LEFT), Input.is_joy_button_pressed(jid, JOY_BUTTON_DPAD_RIGHT))
+			step.move.y += Input.get_joy_axis(jid, JOY_AXIS_LEFT_Y)
+			step.move.y += _bool_axis(Input.is_joy_button_pressed(jid, JOY_BUTTON_DPAD_UP), Input.is_joy_button_pressed(jid, JOY_BUTTON_DPAD_DOWN))
+			step.view.x += Input.get_joy_axis(jid, JOY_AXIS_RIGHT_X)
+			step.view.y += Input.get_joy_axis(jid, JOY_AXIS_RIGHT_Y)
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_A) or Input.is_joy_button_pressed(jid, JOY_BUTTON_Y):
 				step.primary = true
-			if Input.is_joy_button_pressed(joy_id, JOY_BUTTON_B) or Input.is_joy_button_pressed(joy_id, JOY_BUTTON_X):
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_B) or Input.is_joy_button_pressed(jid, JOY_BUTTON_X):
 				step.secondary = true
-			if Input.get_joy_axis(joy_id, JOY_AXIS_TRIGGER_RIGHT) > 0.0 or Input.get_joy_axis(joy_id, JOY_AXIS_TRIGGER_LEFT) > 0.0:
+			if Input.get_joy_axis(jid, JOY_AXIS_TRIGGER_RIGHT) > 0.0 or Input.get_joy_axis(jid, JOY_AXIS_TRIGGER_LEFT) > 0.0:
 				step.trigger = true
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_START):
+				step.start = true
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_BACK):
+				step.back = true
+				
+		if step.move.length_squared() > 1.0:
+			step.move = step.move.normalized()
+		
+		if step.view.length_squared() > 1.0:
+			step.view = step.view.normalized()
+			
+		step.primary_fired = step.primary and not was_primary
+		step.secondary_fired = step.secondary and not was_secondary
+		var is_moving =  step.move.length_squared() > move_trigger_sq
+		step.move_fired = is_moving and (not was_moving or step.move.dot(prev_move) < 0.2)
+		step.start_fired = step.start and not was_start
+		step.back_fired = step.back and not was_back
 	
 			
 func get_input(index: int) -> InputSet:
@@ -91,9 +136,12 @@ func _input(event):
 	
 	
 static func _key_axis(negative: Key, positive: Key) -> float:
+	return _bool_axis(Input.is_key_pressed(negative), Input.is_key_pressed(positive))
+	
+static func _bool_axis(negative: bool, positive: bool) -> float:
 	var result = 0.0
-	if Input.is_key_pressed(positive):
+	if positive:
 		result += 1.0
-	if Input.is_key_pressed(negative):
+	if negative:
 		result -= 1.0
 	return result

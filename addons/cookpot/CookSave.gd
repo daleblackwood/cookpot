@@ -6,12 +6,12 @@ var data := Dictionary()
 
 func set_count(key: String, value: int, player := 0) -> void:
 	var k = to_key(key, player)
-	data[k] = value
+	data[k] = max(value, 0)
 	
 	
 func increase_count(key: String, inc := 1, player := 0) -> void:
 	var v = get_count(key, player)
-	set_count(key, v + inc, player)
+	set_count(key, max(v + inc, 0), player)
 	
 	
 func get_count(key: String, player := 0) -> int:
@@ -68,12 +68,17 @@ func delete(slot: int) -> void:
 	
 	
 func load(slot: int) -> void:
+	clear()
 	self.slot = slot
 	data = read_file(slot)
 	
 	
 func save() -> void:
 	write_file(slot, data)
+	
+	
+func clear() -> void:
+	data.clear()
 		
 		
 func read_file(slot: int) -> Dictionary:

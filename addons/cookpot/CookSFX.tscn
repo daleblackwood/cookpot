@@ -1,8 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://ds6oy75hy60vf"]
 
 [ext_resource type="Script" path="res://addons/cookpot/CookSFX.gd" id="1_tiku6"]
-[ext_resource type="Resource" uid="uid://beu1scp1fx6i4" path="res://audio/sfx/SFXList.tres" id="2_n2tww"]
+[ext_resource type="Resource" uid="uid://bryq2liepqtcy" path="res://Audio/SFXList.tres" id="2_im65n"]
 
 [node name="CookSFX" type="Node3D"]
+process_mode = 3
 script = ExtResource("1_tiku6")
-sfx_list = ExtResource("2_n2tww")
+sfx_list = ExtResource("2_im65n")
