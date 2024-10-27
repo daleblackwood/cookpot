@@ -17,8 +17,8 @@ func grab_focus() -> void:
 	
 func find_buttons(parent: Node) -> Array[Button]:
 	var result: Array[Button] = []
-	for i in range(get_child_count()):
-		var child = get_child(i)
+	for i in range(parent.get_child_count()):
+		var child = parent.get_child(i)
 		if child is Button:
 			result.append(child)
 		else:
@@ -48,7 +48,7 @@ func move_focus(from: Button, move: Vector2) -> void:
 		var diff = button.global_position - from.global_position
 		var dir = diff.normalized()
 		var dot = dir.dot(move_dir)
-		if dot < 0.25:
+		if dot < 0.7:
 			continue
 		var dist_sq = diff.length_squared() * dot
 		if dist_sq > closest_sq:

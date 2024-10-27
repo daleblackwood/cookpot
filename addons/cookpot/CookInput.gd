@@ -110,6 +110,8 @@ func _process(_delta: float):
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_BACK):
 				step.back = true
 				
+		step.move *= 1.3
+				
 		if step.move.length_squared() > 1.0:
 			step.move = step.move.normalized()
 		
