@@ -30,12 +30,36 @@ class InputSet:
 		move_fired = false
 		start = false
 		start_fired = false
+		
+	func add(other: InputSet) -> void:
+		move += other.move
+		view += other.view
+		if other.primary:
+			primary = true
+		if other.primary_fired:
+			primary_fired = true
+		if other.secondary:
+			secondary = true
+		if other.secondary_fired:
+			secondary_fired = true
+		if other.back:
+			back = true
+		if other.back_fired:
+			back_fired = true
+			
+	func clamp() -> void:
+		if move.length_squared() > 1.0:
+			move = move.normalized()
+		if view.length_squared() > 1.0:
+			view = view.normalized()
+		
 	
 var mouse_delta = Vector2.ZERO
 var sets: Array[InputSet] = []
 var connected_joys: Array[int] = []
 
 var blank_input = InputSet.new()
+var all_input = InputSet.new()
 
 func _process(_delta: float):
 	var mouse_move = mouse_delta * 0.1
@@ -111,12 +135,7 @@ func _process(_delta: float):
 				step.back = true
 				
 		step.move *= 1.3
-				
-		if step.move.length_squared() > 1.0:
-			step.move = step.move.normalized()
-		
-		if step.view.length_squared() > 1.0:
-			step.view = step.view.normalized()
+		step.clamp()
 			
 		step.primary_fired = step.primary and not was_primary
 		step.secondary_fired = step.secondary and not was_secondary
@@ -124,12 +143,21 @@ func _process(_delta: float):
 		step.move_fired = is_moving and (not was_moving or step.move.dot(prev_move) < 0.2)
 		step.start_fired = step.start and not was_start
 		step.back_fired = step.back and not was_back
+		
+	all_input.reset()
+	for step in sets:
+		all_input.add(step)
+	all_input.clamp()
 	
 			
 func get_input(index: int) -> InputSet:
 	if index < 0 or index >= sets.size():
 		return blank_input
 	return sets[index]
+	
+	
+func get_combined() -> InputSet:
+	return all_input
 	
 
 func _input(event):
@@ -139,6 +167,7 @@ func _input(event):
 	
 static func _key_axis(negative: Key, positive: Key) -> float:
 	return _bool_axis(Input.is_key_pressed(negative), Input.is_key_pressed(positive))
+	
 	
 static func _bool_axis(negative: bool, positive: bool) -> float:
 	var result = 0.0
