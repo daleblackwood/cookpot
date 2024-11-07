@@ -30,6 +30,8 @@ class InputSet:
 		move_fired = false
 		start = false
 		start_fired = false
+		back = false
+		back_fired = false
 		
 	func add(other: InputSet) -> void:
 		move += other.move
