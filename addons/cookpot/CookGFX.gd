@@ -10,14 +10,16 @@ func fire(name: String, position: Vector3, data: Variant = null) -> Node3D:
 	var inst = gfx_list.get_instance(name)
 	if inst == null:
 		return null
+	inst.global_transform.origin = position
 	if inst.get_parent() == null:
 		add_child(inst)
-	inst.global_transform.origin = position
 	if inst.has_method("_on_fire"):
 		if data == null:
 			inst.call("_on_fire")
 		else:
 			inst.call("_on_fire", data)
+	if inst is CPUParticles3D:
+		(inst as CPUParticles3D).restart()
 	return inst
 	
 

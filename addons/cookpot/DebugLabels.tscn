@@ -1,0 +1,78 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgujyrlpwy7fn"]
+
+[sub_resource type="GDScript" id="GDScript_rsbjl"]
+script/source = "extends Control
+
+var labels: Array[Label]
+
+func _ready() -> void:
+	var first = get_child(0)
+	labels.append(first)
+
+
+func _process(delta: float) -> void:
+	for label in labels:
+		label.visible = false
+			
+			
+func display(world_pos: Vector3, message: String, color: Color) -> void:
+	var index = -1
+	for i in range(labels.size()):
+		if not labels[i].visible:
+			index = i
+			break
+	if index < 0:
+		var new_label = labels[0].duplicate()
+		labels[0].get_parent().add_child(new_label)
+		index = labels.size()
+		labels.append(new_label)
+	var label = labels[index]
+	label.text = message
+	label.position = world_to_ui_position(world_pos)
+	var stylebox = StyleBoxFlat.new()
+	stylebox.bg_color = color
+	label.add_theme_stylebox_override(\"panel\", stylebox)
+	var luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
+	if luminance > 0.5:
+		label.add_theme_color_override(\"font_color\", Color.BLACK)
+	else:
+		label.add_theme_color_override(\"font_color\", Color.WHITE)
+	
+	
+func world_to_ui_position(world_pos: Vector3) -> Vector2:
+	var cam = get_viewport().get_camera_3d()
+	if cam == null:
+		return Vector2.ZERO
+	var screen_pos = cam.unproject_position(world_pos)
+	var viewport = get_viewport()
+	var rect_size = viewport.get_visible_rect().size
+	return Vector2(screen_pos.x, screen_pos.y)
+
+
+func _is_allowed() -> bool:
+	return OS.has_feature(\"editor\")
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aojb8"]
+bg_color = Color(0.212305, 0.212305, 0.212305, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="DebugLabels" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_rsbjl")
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 0
+offset_right = 24.0
+offset_bottom = 23.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_aojb8")
