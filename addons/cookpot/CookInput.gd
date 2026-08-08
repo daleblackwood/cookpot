@@ -13,11 +13,16 @@ class InputSet:
 	var secondary := false
 	var secondary_fired := false
 	var trigger := false
+	var trigger_fired := false
 	var move_fired := false
 	var start := false
 	var start_fired := false
 	var back := false
 	var back_fired := false
+	var bumper_l := false
+	var bumper_l_fired := false
+	var bumper_r := false
+	var bumper_r_fired := false
 	
 	func reset() -> void:
 		move = Vector2.ZERO
@@ -27,13 +32,24 @@ class InputSet:
 		secondary = false
 		secondary_fired = false
 		trigger = false
+		trigger_fired = false
 		move_fired = false
 		start = false
 		start_fired = false
+		back = false
+		back_fired = false
+		bumper_l = false
+		bumper_l_fired = false
+		bumper_r = false
+		bumper_r_fired = false
+		
 	
 var mouse_delta = Vector2.ZERO
 var sets: Array[InputSet] = []
 var connected_joys: Array[int] = []
+var mouse_mode := 0
+var has_focus := true
+var had_focus := false
 
 var blank_input = InputSet.new()
 
@@ -58,6 +74,9 @@ func _process(_delta: float):
 		var was_secondary = step.secondary
 		var was_start = step.start
 		var was_back = step.back
+		var was_trigger = step.trigger
+		var was_bumper_l = step.bumper_l
+		var was_bumper_r = step.bumper_r
 		
 		step.reset()
 		
@@ -73,12 +92,16 @@ func _process(_delta: float):
 				step.primary = true
 			if Input.is_key_pressed(KEY_ALT):
 				step.secondary = true
-			if Input.is_key_pressed(KEY_CTRL):
+			if Input.is_key_pressed(KEY_SHIFT):
 				step.trigger = true
 			if Input.is_key_pressed(KEY_ENTER):
 				step.start = true
 			if Input.is_key_pressed(KEY_ESCAPE):
 				step.back = true
+			if Input.is_key_pressed(KEY_COMMA):
+				step.bumper_l = true
+			if Input.is_key_pressed(KEY_PERIOD):
+				step.bumper_r = true
 		if i == 1 or (i == 0 and player_count < 2):
 			step.move.x += _key_axis(KEY_A, KEY_D)
 			step.move.y += _key_axis(KEY_W, KEY_S)
@@ -109,6 +132,10 @@ func _process(_delta: float):
 				step.start = true
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_BACK):
 				step.back = true
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_LEFT_SHOULDER):
+				step.bumper_l = true
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_RIGHT_SHOULDER):
+				step.bumper_r = true
 				
 		step.move *= 1.3
 				
@@ -124,8 +151,43 @@ func _process(_delta: float):
 		step.move_fired = is_moving and (not was_moving or step.move.dot(prev_move) < 0.2)
 		step.start_fired = step.start and not was_start
 		step.back_fired = step.back and not was_back
+		step.trigger_fired = step.trigger and not was_trigger
+		step.bumper_l_fired = step.bumper_l and not was_bumper_l
+		step.bumper_r_fired = step.bumper_r and not was_bumper_r
+		
+	mouse_delta = Vector2.ZERO
 	
+	var applied_mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if not has_focus:
+		applied_mouse_mode = Input.MOUSE_MODE_VISIBLE
+		
+	var is_maximized = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_MAXIMIZED
+	if Input.is_key_pressed(KEY_ALT) and Input.is_key_pressed(KEY_ENTER):
+		if is_maximized:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		else:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 			
+	if is_maximized:
+		applied_mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+			
+	if applied_mouse_mode != Input.mouse_mode:
+		Input.mouse_mode = mouse_mode
+	
+	
+func _ready() -> void:
+	get_viewport().focus_entered.connect(_on_window_focus_in)
+	get_viewport().focus_exited.connect(_on_window_focus_out)
+	
+	
+func _on_window_focus_in() -> void:
+	has_focus = true
+	
+	
+func _on_window_focus_out() -> void:
+	has_focus = false
+	
+	
 func get_input(index: int) -> InputSet:
 	if index < 0 or index >= sets.size():
 		return blank_input
@@ -135,10 +197,15 @@ func get_input(index: int) -> InputSet:
 func _input(event):
 	if event is InputEventMouseMotion:
 		mouse_delta = event.relative
+		
+	
+func capture_mouse() -> void:
+	mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
 	
 	
 static func _key_axis(negative: Key, positive: Key) -> float:
 	return _bool_axis(Input.is_key_pressed(negative), Input.is_key_pressed(positive))
+	
 	
 static func _bool_axis(negative: bool, positive: bool) -> float:
 	var result = 0.0

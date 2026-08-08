@@ -1,6 +1,6 @@
 extends Node3D
 
-const NO_SOURCE := Vector3.ZERO#Vector3(1234567890, 1234567890, 1234567890)
+const NO_SOURCE := Vector3.ZERO
 
 class AudioGroup:
 	var name : String
@@ -48,11 +48,11 @@ func get_next_channel() -> AudioStreamPlayer3D:
 func get_file(sound_name: String, index := -1) -> AudioStream:
 	if sfx_list == null or sfx_list.audio_files.size() < 1:
 		return null
-	var tag := CookStrings.to_tag(sound_name, false)
+	var tag := CookStrings.to_tag_numberless(sound_name)
 	if groups.has(tag) == false:
 		var new_group = AudioGroup.new(tag)
 		for file in sfx_list.audio_files:
-			var ft := CookStrings.to_tag(file.resource_path, false)
+			var ft := CookStrings.to_tag_numberless(file.resource_path)
 			if ft == tag:
 				new_group.files.append(file)
 		if new_group.files.size() < 1:

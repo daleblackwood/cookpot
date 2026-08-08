@@ -1,24 +1,8 @@
-extends Node3D
-
-@export var gfx_list: CookGFXList
-
+extends CookInstancer
+	
 
 func fire(name: String, position: Vector3, data: Variant = null) -> Node3D:
-	if gfx_list == null:
-		printerr("No GFX List set")
-		return null
-	var inst = gfx_list.get_instance(name)
-	if inst == null:
-		return null
-	if inst.get_parent() == null:
-		add_child(inst)
-	inst.global_transform.origin = position
-	if inst.has_method("_on_fire"):
-		if data == null:
-			inst.call("_on_fire")
-		else:
-			inst.call("_on_fire", data)
-	return inst
+	return spawn(name, self, position, "_on_fire", data)
 	
 
 func fire_many(count: int, name: String, position: Vector3, data: Variant = null) -> Array[Node3D]:

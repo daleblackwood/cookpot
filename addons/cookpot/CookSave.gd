@@ -86,7 +86,7 @@ func read_file(slot: int) -> Dictionary:
 	if not FileAccess.file_exists(filename):
 		return Dictionary()
 	var file := FileAccess.open(filename, FileAccess.READ)
-	var text := file.get_as_text(true)
+	var text := file.get_as_text()
 	file.close()
 	var dict := JSON.parse_string(text) as Dictionary
 	return dict
@@ -95,7 +95,7 @@ func read_file(slot: int) -> Dictionary:
 static func write_file(slot: int, dict: Dictionary) -> void:
 	var filename := get_filename(slot)
 	var text := JSON.stringify(dict)
-	var file := FileAccess.open("user://savegame.save", FileAccess.WRITE)
+	var file := FileAccess.open(filename, FileAccess.WRITE)
 	file.store_string(text)
 	file.close()
 	
