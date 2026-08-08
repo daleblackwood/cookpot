@@ -24,5 +24,7 @@ func spawn(inst_name: String, parent: Node = null, position: Variant = null, met
 				inst.call(method)
 			else:
 				inst.call(method, data)
+	if inst is CPUParticles3D:
+		(inst as CPUParticles3D).restart()
 	return inst
 	

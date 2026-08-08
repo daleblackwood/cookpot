@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 const NO_SOURCE := Vector3.ZERO
 

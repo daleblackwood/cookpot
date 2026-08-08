@@ -1,82 +1,37 @@
 extends Node
 
-const max_player_count = 4
-const move_trigger_sq = 0.2
+const PLAYER_LIMIT := 16
+const MOVE_TRIGGER_SQ = 0.2
 
-@export_range(1, max_player_count) var player_count := 1
-
-class InputSet:
-	var move := Vector2.ZERO
-	var view := Vector2.ZERO
-	var primary := false
-	var primary_fired := false
-	var secondary := false
-	var secondary_fired := false
-	var trigger := false
-	var trigger_fired := false
-	var move_fired := false
-	var start := false
-	var start_fired := false
-	var back := false
-	var back_fired := false
-	var bumper_l := false
-	var bumper_l_fired := false
-	var bumper_r := false
-	var bumper_r_fired := false
-	
-	func reset() -> void:
-		move = Vector2.ZERO
-		view = Vector2.ZERO
-		primary = false
-		primary_fired = false
-		secondary = false
-		secondary_fired = false
-		trigger = false
-		trigger_fired = false
-		move_fired = false
-		start = false
-		start_fired = false
-		back = false
-		back_fired = false
-		bumper_l = false
-		bumper_l_fired = false
-		bumper_r = false
-		bumper_r_fired = false
-		
+@export_range(1, PLAYER_LIMIT) var player_slot_count := 1
 	
 var mouse_delta = Vector2.ZERO
-var sets: Array[InputSet] = []
+var sets: Array[CookInputSet] = []
 var connected_joys: Array[int] = []
 var mouse_mode := 0
 var has_focus := true
 var had_focus := false
 
-var blank_input = InputSet.new()
+var blank_input = CookInputSet.new()
+var all_input = CookInputSet.new()
 
 func _process(_delta: float):
 	var mouse_move = mouse_delta * 0.1
 	
 	blank_input.reset()
 	
-	if sets.size() != player_count:
-		sets.resize(player_count)
-		for i in range(player_count):
-			sets[i] = InputSet.new()
+	if sets.size() != player_slot_count:
+		sets.resize(player_slot_count)
+		for i in range(player_slot_count):
+			sets[i] = CookInputSet.new()
 			
 	connected_joys = Input.get_connected_joypads()
 	
-	for i in range(player_count):
+	for i in range(player_slot_count):
 		var step := sets[i]
 		
 		var prev_move = step.move
-		var was_moving = step.move.length_squared() > move_trigger_sq
-		var was_primary = step.primary
-		var was_secondary = step.secondary
-		var was_start = step.start
-		var was_back = step.back
-		var was_trigger = step.trigger
-		var was_bumper_l = step.bumper_l
-		var was_bumper_r = step.bumper_r
+		var prev_actions = step.states.duplicate()
 		
 		step.reset()
 		
@@ -89,30 +44,30 @@ func _process(_delta: float):
 			step.view.y += mouse_move.y
 			
 			if Input.is_key_pressed(KEY_SPACE):
-				step.primary = true
+				step.states[CookInputSet.Action.PRIMARY] = 1
 			if Input.is_key_pressed(KEY_ALT):
-				step.secondary = true
+				step.states[CookInputSet.Action.SECONDARY] = 1
 			if Input.is_key_pressed(KEY_SHIFT):
-				step.trigger = true
+				step.states[CookInputSet.Action.TRIGGER] = 1
 			if Input.is_key_pressed(KEY_ENTER):
-				step.start = true
+				step.states[CookInputSet.Action.START] = 1
 			if Input.is_key_pressed(KEY_ESCAPE):
-				step.back = true
+				step.states[CookInputSet.Action.BACK] = 1
 			if Input.is_key_pressed(KEY_COMMA):
-				step.bumper_l = true
+				step.states[CookInputSet.Action.BUMPER_L] = 1
 			if Input.is_key_pressed(KEY_PERIOD):
-				step.bumper_r = true
-		if i == 1 or (i == 0 and player_count < 2):
+				step.states[CookInputSet.Action.BUMPER_R] = 1
+		if i == 1 or (i == 0 and player_slot_count < 2):
 			step.move.x += _key_axis(KEY_A, KEY_D)
 			step.move.y += _key_axis(KEY_W, KEY_S)
 			step.view.x += _key_axis(KEY_Q, KEY_E)
 			
 			if Input.is_key_pressed(KEY_R):
-				step.primary = true
+				step.states[CookInputSet.Action.PRIMARY] = 1
 			if Input.is_key_pressed(KEY_R):
-				step.secondary = true
+				step.states[CookInputSet.Action.SECONDARY] = 1
 			if Input.is_key_pressed(KEY_SHIFT):
-				step.trigger = true
+				step.states[CookInputSet.Action.TRIGGER] = 1
 				
 		if i < connected_joys.size():
 			var jid := connected_joys[i]
@@ -123,39 +78,52 @@ func _process(_delta: float):
 			step.view.x += Input.get_joy_axis(jid, JOY_AXIS_RIGHT_X)
 			step.view.y += Input.get_joy_axis(jid, JOY_AXIS_RIGHT_Y)
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_A) or Input.is_joy_button_pressed(jid, JOY_BUTTON_Y):
-				step.primary = true
+				step.states[CookInputSet.Action.PRIMARY] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_B) or Input.is_joy_button_pressed(jid, JOY_BUTTON_X):
-				step.secondary = true
+				step.states[CookInputSet.Action.SECONDARY] = 1
 			if Input.get_joy_axis(jid, JOY_AXIS_TRIGGER_RIGHT) > 0.0 or Input.get_joy_axis(jid, JOY_AXIS_TRIGGER_LEFT) > 0.0:
-				step.trigger = true
+				step.states[CookInputSet.Action.TRIGGER] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_START):
-				step.start = true
+				step.states[CookInputSet.Action.START] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_BACK):
-				step.back = true
+				step.states[CookInputSet.Action.BACK] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_LEFT_SHOULDER):
-				step.bumper_l = true
+				step.states[CookInputSet.Action.BUMPER_L] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_RIGHT_SHOULDER):
-				step.bumper_r = true
+				step.states[CookInputSet.Action.BUMPER_R] = 1
 				
 		step.move *= 1.3
-				
-		if step.move.length_squared() > 1.0:
-			step.move = step.move.normalized()
-		
-		if step.view.length_squared() > 1.0:
-			step.view = step.view.normalized()
+		step.clamp()
 			
-		step.primary_fired = step.primary and not was_primary
-		step.secondary_fired = step.secondary and not was_secondary
-		var is_moving =  step.move.length_squared() > move_trigger_sq
-		step.move_fired = is_moving and (not was_moving or step.move.dot(prev_move) < 0.2)
-		step.start_fired = step.start and not was_start
-		step.back_fired = step.back and not was_back
-		step.trigger_fired = step.trigger and not was_trigger
-		step.bumper_l_fired = step.bumper_l and not was_bumper_l
-		step.bumper_r_fired = step.bumper_r and not was_bumper_r
+		var is_moving = step.move.length_squared() > MOVE_TRIGGER_SQ
+		var was_moving = prev_actions[CookInputSet.Action.MOVED] > 0
+		if is_moving:
+			if not was_moving or step.move.dot(prev_move) < 0.2:
+				step.states[CookInputSet.Action.MOVED] = 2
+			else:
+				step.states[CookInputSet.Action.MOVED] = 1
+		else:
+			step.states[CookInputSet.Action.MOVED] = 0
+			
+		for act in range(CookInputSet.Action.MAX):
+			if act == CookInputSet.Action.MOVED or act == CookInputSet.Action.VIEWED:
+				continue
+			var is_pressed = step.states[act] > 0
+			var was_pressed = prev_actions[act] > 0
+			if is_pressed:
+				if not was_pressed:
+					step.states[act] = 2
+				else:
+					step.states[act] = 1
+			else:
+				step.states[act] = 0
 		
 	mouse_delta = Vector2.ZERO
+		
+	all_input.reset()
+	for step in sets:
+		all_input.add(step)
+	all_input.clamp()
 	
 	var applied_mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not has_focus:
@@ -188,10 +156,14 @@ func _on_window_focus_out() -> void:
 	has_focus = false
 	
 	
-func get_input(index: int) -> InputSet:
+func get_input(index: int) -> CookInputSet:
 	if index < 0 or index >= sets.size():
 		return blank_input
-	return sets[index]
+	return sets[index] as CookInputSet
+	
+	
+func get_combined() -> CookInputSet:
+	return all_input
 	
 
 func _input(event):
