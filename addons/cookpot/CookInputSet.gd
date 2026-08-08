@@ -16,10 +16,10 @@ func reset() -> void:
 	view = Vector2.ZERO
 	states.fill(0)
 
-func is_pressed(action: Action) -> bool:
+func pressed(action: Action) -> bool:
 	return states[action] >= 1
 
-func was_fired(action: Action) -> bool:
+func fired(action: Action) -> bool:
 	return states[action] == 2
 	
 func add(other: CookInputSet) -> void:
