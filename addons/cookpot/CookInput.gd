@@ -1,7 +1,7 @@
 extends Node
 
 const PLAYER_LIMIT := 16
-const MOVE_TRIGGER_SQ = 0.2
+const MOVE_TRIGGER_SQ = 0.1
 
 @export_range(1, PLAYER_LIMIT) var player_slot_count := 1
 	
