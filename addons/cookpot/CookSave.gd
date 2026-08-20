@@ -1,5 +1,7 @@
 extends Node
 
+signal value_set(key: String)
+
 var slot := 0
 var data := Dictionary()
 
@@ -7,6 +9,7 @@ var data := Dictionary()
 func set_count(key: String, value: int, player := 0) -> void:
 	var k = to_key(key, player)
 	data[k] = max(value, 0)
+	value_set.emit(k)
 	
 	
 func increase_count(key: String, inc := 1, player := 0) -> void:
@@ -22,8 +25,9 @@ func get_count(key: String, player := 0) -> int:
 	
 	
 func set_string(key: String, value: String, player := 0) -> void:
-	var dkey = to_key(key, player)
-	data[dkey] = value
+	var k = to_key(key, player)
+	data[k] = value
+	value_set.emit(k)
 	
 	
 func get_string(key: String, player := 0) -> String:
@@ -36,6 +40,7 @@ func get_string(key: String, player := 0) -> String:
 func set_float(key: String, value: float, player := 0) -> void:
 	var k = to_key(key, player)
 	data[k] = value
+	value_set.emit(k)
 	
 	
 func get_float(key: String, player := 0) -> float:
@@ -48,6 +53,7 @@ func get_float(key: String, player := 0) -> float:
 func set_vector(key: String, value: Vector3, player := 0) -> void:
 	var k = to_key(key, player)
 	data[k] = [value.x, value.y, value.z]
+	value_set.emit(k)
 	
 	
 func get_vector(key: String, player := 0) -> Vector3:
@@ -86,17 +92,27 @@ func read_file(slot: int) -> Dictionary:
 	if not FileAccess.file_exists(filename):
 		return Dictionary()
 	var file := FileAccess.open(filename, FileAccess.READ)
-	var text := file.get_as_text()
+	file.big_endian = true
+	var size := file.get_32()
+	var bytes := file.get_buffer(size)
+	var expected_checksum := file.get_64()
 	file.close()
-	var dict := JSON.parse_string(text) as Dictionary
-	return dict
-	
-	
+	if hash(bytes) != expected_checksum:
+		return Dictionary()
+	var dict = bytes_to_var(bytes)
+	if typeof(dict) != TYPE_DICTIONARY:
+		return Dictionary()
+	return dict as Dictionary
+
+
 static func write_file(slot: int, dict: Dictionary) -> void:
 	var filename := get_filename(slot)
-	var text := JSON.stringify(dict)
 	var file := FileAccess.open(filename, FileAccess.WRITE)
-	file.store_string(text)
+	file.big_endian = true
+	var bytes := var_to_bytes(dict)
+	file.store_32(bytes.size())
+	file.store_buffer(bytes)
+	file.store_64(hash(bytes))
 	file.close()
 	
 	
@@ -107,7 +123,7 @@ static func remove_file(slot: int) -> void:
 	
 		
 static func get_filename(slot: int) -> String:
-	return ("user://save%s.save" % slot)
+	return ("user://save%s.sav" % slot)
 	
 	
 static func to_key(name: String, index: int) -> String:
