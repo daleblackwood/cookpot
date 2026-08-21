@@ -8,6 +8,16 @@ static func get_ancestor(node: Node, type: Variant) -> Node:
 			return parent
 		parent = parent.get_parent()
 	return null
+	
+	
+static func find_type(node: Node, type: Variant) -> Node:
+	if is_instance_of(node, type):
+		return node
+	for child in node.get_children():
+		var child_result := find_type(child, type)
+		if child_result:
+			return child_result
+	return null
 
 
 static func make_elements(elements: Array, count: int) -> void:
