@@ -30,6 +30,23 @@ func set_string(key: String, value: String, player := 0) -> void:
 	value_set.emit(k)
 	
 	
+func set_value(key: String, value: String, player := 0) -> void:
+	var k = to_key(key, player)
+	var stored_value
+	if value.is_valid_int():
+		stored_value = value.to_int()
+	elif value.is_valid_float():
+		stored_value = value.to_float()
+	elif value.to_lower() == "true":
+		stored_value = true
+	elif value.to_lower() == "false":
+		stored_value = false
+	else:
+		stored_value = value
+	data[k] = stored_value
+	value_set.emit(k)
+	
+	
 func get_string(key: String, player := 0) -> String:
 	var k = to_key(key, player)
 	if not data.has(k):
