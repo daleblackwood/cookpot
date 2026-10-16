@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ckk1s702sotvr"]
+
+[ext_resource type="Script" uid="uid://lopwvq3j7rbr" path="res://addons/cookpot/CookGFX.gd" id="1_5n78o"]
+
+[node name="CookIcons" type="Node3D" unique_id=1593640682]
+script = ExtResource("1_5n78o")

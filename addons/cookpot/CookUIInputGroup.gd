@@ -10,7 +10,7 @@ func _ready() -> void:
 	focus_delay = initial_focus_delay	
 	
 	
-func grab_focus() -> void:
+func grab_focus(_hide_focus := false) -> void:
 	focused = null
 	set_focused(buttons[0])
 	

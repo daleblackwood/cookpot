@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://xdd1fj075f86"]
+[gd_scene format=3 uid="uid://xdd1fj075f86"]
 
-[ext_resource type="Script" path="res://addons/cookpot/CookInput.gd" id="1_rfxs5"]
+[ext_resource type="Script" uid="uid://m32y55xncr05" path="res://addons/cookpot/CookInput.gd" id="1_rfxs5"]
 
-[node name="CookInput" type="Node"]
+[node name="CookInput" type="Node" unique_id=1840531024]
 process_mode = 3
 process_priority = -1000
 script = ExtResource("1_rfxs5")

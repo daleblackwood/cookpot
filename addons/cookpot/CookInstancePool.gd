@@ -1,4 +1,4 @@
-class_name CookGFXList
+class_name CookInstancePool
 extends Resource
 
 @export var default_pool_size := 8
@@ -8,13 +8,13 @@ extends Resource
 
 class PoolEntry:
 	var scene: PackedScene
-	var instances: Array[Node3D]
+	var instances: Array[Node]
 	var size: int
 	var next := 0
 
 var pools := Dictionary()
 
-func get_instance(name: String) -> Node3D:
+func get_instance(name: String) -> Node:
 	var pool := get_pool(name)
 	if not pool:
 		return null
