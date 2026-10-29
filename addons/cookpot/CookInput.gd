@@ -57,6 +57,8 @@ func _process(_delta: float):
 				step.states[CookInputSet.Action.BUMPER_L] = 1
 			if Input.is_key_pressed(KEY_PERIOD):
 				step.states[CookInputSet.Action.BUMPER_R] = 1
+			if Input.is_key_pressed(KEY_C):
+				step.states[CookInputSet.Action.VIEW_TOGGLE] = 1
 		if i == 1 or (i == 0 and player_slot_count < 2):
 			step.move.x += _key_axis(KEY_A, KEY_D)
 			step.move.y += _key_axis(KEY_W, KEY_S)
@@ -91,6 +93,8 @@ func _process(_delta: float):
 				step.states[CookInputSet.Action.BUMPER_L] = 1
 			if Input.is_joy_button_pressed(jid, JOY_BUTTON_RIGHT_SHOULDER):
 				step.states[CookInputSet.Action.BUMPER_R] = 1
+			if Input.is_joy_button_pressed(jid, JOY_BUTTON_RIGHT_STICK):
+				step.states[CookInputSet.Action.VIEW_TOGGLE] = 1
 				
 		step.move *= 1.3
 		step.clamp()

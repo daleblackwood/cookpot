@@ -4,9 +4,8 @@ extends Resource
 @export var resources: Array[Resource]
 
 func get_resource(name: String) -> Resource:
-	var key := CookStrings.to_tag(name)
 	for r in resources:
-		if CookStrings.to_tag(r.resource_name) == key:
+		if CookStrings.tag_match(name, r.resource_name):
 			return r
 	return null
 
@@ -16,7 +15,7 @@ func get_group(name: String) -> Array[Resource]:
 	if not _groups.has(key):
 		var group: Array[Resource] = []
 		for r in resources:
-			if CookStrings.to_tag(r.resource_name) == key:
+			if CookStrings.tag_match_numberless(key, r.resource_name):
 				group.append(r)
 		_groups[key] = group
 	return _groups[key]

@@ -52,8 +52,7 @@ func get_file(sound_name: String, index := -1) -> AudioStream:
 	if groups.has(tag) == false:
 		var new_group = AudioGroup.new(tag)
 		for file in sfx_list.audio_files:
-			var ft := CookStrings.to_tag_numberless(file.resource_path)
-			if ft == tag:
+			if CookStrings.tag_match_numberless(tag, file.resource_path):
 				new_group.files.append(file)
 		if new_group.files.size() < 1:
 			printerr("Can't find sound %s" % sound_name)

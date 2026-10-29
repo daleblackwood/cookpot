@@ -1,7 +1,7 @@
 class_name CookInputSet
 extends RefCounted
 
-enum Action { PRIMARY, SECONDARY, TRIGGER, BUMPER_L, BUMPER_R, START, BACK, MOVED, VIEWED, OPTION, MAX }
+enum Action { PRIMARY, SECONDARY, TRIGGER, BUMPER_L, BUMPER_R, START, BACK, MOVED, VIEWED, VIEW_TOGGLE, OPTION, MAX }
 
 var move := Vector2.ZERO
 var view := Vector2.ZERO

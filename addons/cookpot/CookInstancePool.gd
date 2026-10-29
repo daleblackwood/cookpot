@@ -30,15 +30,13 @@ func get_instance(name: String) -> Node:
 		
 		
 func get_pool(name: String) -> PoolEntry:
-	var tag := CookStrings.to_tag(name)
 	if not pools.has(name):
 		var scene_index := -1
 		for i in range(scenes.size()):
 			var scene = scenes[i]
 			if scene == null:
 				continue
-			var scene_tag = CookStrings.to_tag(scene.resource_path)
-			if scene_tag == tag:
+			if CookStrings.tag_match(name, scene.resource_path):
 				scene_index = i
 				break
 		if scene_index < 0:

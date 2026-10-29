@@ -5,11 +5,9 @@ extends Resource
 @export var music: Array[CookMusicEntry]
 
 func get_entry(name: String) -> CookMusicEntry:
-	var tag = CookStrings.to_tag(name)
 	for entry in music:
 		if entry.file == null:
 			continue
-		var entry_tag = CookStrings.to_tag(entry.file.resource_path)
-		if entry_tag == tag:
+		if CookStrings.tag_match(name, entry.file.resource_path):
 			return entry
 	return null
