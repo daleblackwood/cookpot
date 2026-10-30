@@ -2,6 +2,7 @@ extends Node
 
 const PLAYER_LIMIT := 16
 const MOVE_TRIGGER_SQ = 0.1
+const IGNORED_JOY_NAMES := ["wheel", "pedal", "shifter", "handbrake", "racing"]
 
 @export_range(1, PLAYER_LIMIT) var player_slot_count := 1
 	
@@ -11,6 +12,9 @@ var connected_joys: Array[int] = []
 var mouse_mode := 0
 var has_focus := true
 var had_focus := false
+var mouse_mode_captured := Input.MOUSE_MODE_CAPTURED
+var mouse_mode_uncaptured := Input.MOUSE_MODE_VISIBLE
+var is_capturing := false
 
 var blank_input = CookInputSet.new()
 var all_input = CookInputSet.new()
@@ -25,7 +29,7 @@ func _process(_delta: float):
 		for i in range(player_slot_count):
 			sets[i] = CookInputSet.new()
 			
-	connected_joys = Input.get_connected_joypads()
+	connected_joys.assign(Input.get_connected_joypads().filter(_is_gamepad))
 	
 	for i in range(player_slot_count):
 		var step := sets[i]
@@ -129,7 +133,7 @@ func _process(_delta: float):
 		all_input.add(step)
 	all_input.clamp()
 	
-	var applied_mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var applied_mouse_mode := mouse_mode
 	if not has_focus:
 		applied_mouse_mode = Input.MOUSE_MODE_VISIBLE
 		
@@ -139,12 +143,10 @@ func _process(_delta: float):
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		else:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
-			
-	if is_maximized:
-		applied_mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
-			
+
 	if applied_mouse_mode != Input.mouse_mode:
-		Input.mouse_mode = mouse_mode
+		Input.mouse_mode = applied_mouse_mode
+	is_capturing = Input.mouse_mode == mouse_mode_captured
 	
 	
 func _ready() -> void:
@@ -175,10 +177,23 @@ func _input(event):
 		mouse_delta = event.relative
 		
 	
-func capture_mouse() -> void:
-	mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+func capture_mouse(capture := true) -> void:
+	if capture == is_capturing:
+		return
+	is_capturing = capture
+	if capture:
+		mouse_mode = mouse_mode_captured
+	else:
+		mouse_mode = mouse_mode_uncaptured
 	
 	
+static func _is_gamepad(jid: int) -> bool:
+	if not Input.is_joy_known(jid):
+		return false
+	var jname := Input.get_joy_name(jid).to_lower()
+	return not IGNORED_JOY_NAMES.any(func(word): return jname.contains(word))
+
+
 static func _key_axis(negative: Key, positive: Key) -> float:
 	return _bool_axis(Input.is_key_pressed(negative), Input.is_key_pressed(positive))
 	
