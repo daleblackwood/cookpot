@@ -19,6 +19,7 @@ static func capture(target: Node3D, settings: SnapshotTexture) -> Image:
 	env.background_mode = Environment.BG_CLEAR_COLOR
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color.WHITE
+	env.ambient_light_energy = 0.6
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
@@ -33,8 +34,14 @@ static func capture(target: Node3D, settings: SnapshotTexture) -> Image:
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	viewport.add_child(cam)
 
+	var view_basis: Basis = editor.get_editor_viewport_3d(0).get_camera_3d().global_basis.orthonormalized()
+	var light := DirectionalLight3D.new()
+	light.light_energy = 0.8
+	light.basis = view_basis.rotated(view_basis.y, deg_to_rad(45.0))
+	viewport.add_child(light)
+
 	editor.get_base_control().add_child(viewport)
-	_frame_camera(cam, copy, editor.get_editor_viewport_3d(0).get_camera_3d().global_basis.orthonormalized())
+	_frame_camera(cam, copy, view_basis)
 	cam.make_current()
 
 	await RenderingServer.frame_post_draw
