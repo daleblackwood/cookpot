@@ -3,6 +3,7 @@ extends Node
 const PLAYER_LIMIT := 16
 const MOVE_TRIGGER_SQ = 0.1
 const IGNORED_JOY_NAMES := ["wheel", "pedal", "shifter", "handbrake", "racing"]
+const TOUCHPAD_X_MULTI := 3.0
 
 @export_range(1, PLAYER_LIMIT) var player_slot_count := 1
 
@@ -15,6 +16,7 @@ var had_focus := false
 var mouse_mode_captured := Input.MOUSE_MODE_CAPTURED
 var mouse_mode_uncaptured := Input.MOUSE_MODE_VISIBLE
 var is_capturing := false
+var view_when_uncaptured := false
 var stick_deadzone := 0.1
 var blank_input = CookInputSet.new()
 var all_input = CookInputSet.new()
@@ -44,8 +46,9 @@ func _process(_delta: float):
 			step.move.y += _key_axis(KEY_UP, KEY_DOWN)
 			step.view.x += _key_axis(KEY_COMMA, KEY_PERIOD)
 
-			step.view.x += mouse_move.x
-			step.view.y += mouse_move.y
+			if is_capturing or view_when_uncaptured:
+				step.view.x += mouse_move.x
+				step.view.y += mouse_move.y
 
 			if Input.is_key_pressed(KEY_SPACE):
 				step.states[CookInputSet.Action.PRIMARY] = 1
@@ -173,7 +176,7 @@ func get_combined() -> CookInputSet:
 
 func _input(event):
 	if event is InputEventMouseMotion:
-		mouse_delta = event.relative
+		mouse_delta = event.screen_relative
 
 
 func capture_mouse(capture := true) -> void:
